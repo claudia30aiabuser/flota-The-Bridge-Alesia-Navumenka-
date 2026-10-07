@@ -17,7 +17,7 @@ import numpy as np
 
 # crear_tablero()
 
-tablero=np.full((12, 12), " ")
+tablero=np.full((12, 12), ".")
 tablero[0, :]=np.arange(12)
 tablero[:, 0]=np.arange(12)
 tablero[11, :]=np.full((1,12), "|")
@@ -25,8 +25,10 @@ tablero[:, 11]=np.full((1,12), "|")
         # tablero[0, :]=np.array([chr(8304), chr(185), chr(178), chr(179), chr(8308), chr(8309), chr(8310), chr(8311), chr(8312), chr(8313), chr(7496), "*"])
         # tablero[:, 0]=np.array([chr(8304), chr(185), chr(178), chr(179), chr(8308), chr(8309), chr(8310), chr(8311), chr(8312), chr(8313), chr(7496), "*"])
         # #tablero[11, :]=np.full((1, 11), "*") 
-vista_del_tablero = np.full((10, 10), " ")
+vista_del_tablero = np.full((10, 10), ".")
 vista_del_tablero = np.pad(vista_del_tablero, 1, constant_values="|")
+vista_del_tablero[0, :11]=np.arange(11)
+vista_del_tablero[:11, 0]=np.arange(11)
 # print(tablero)
 # print(vista_del_tablero)
  
@@ -166,34 +168,108 @@ colocar_barco1_rand()
 colocar_barco1_rand()
 colocar_barco1_rand()
 
+print("==================NUEVA=PARTIDA==================NUEVA=PARTIDA===================NUEVA=PARTIDA==\n" \
+      "==NUEVA=PARTIDA==================NUEVA=PARTIDA===================NUEVA=PARTIDA==================\n" \
+      "==================NUEVA=PARTIDA==================NUEVA=PARTIDA===================NUEVA=PARTIDA==")
 print(tablero)    
+print("Como se ve mi tablero:")
 print(vista_del_tablero)
+
+
+paso_turno=bool
 
 def disparar():
  
     disp_fil = np.random.randint(1, 11)
     disp_col = np.random.randint(1, 11)
+    print("=============disparo=================\n" \
+          "==============nuevo==================\n" \
+          "==========   ", (disp_fil, disp_col), "   ==========")
+   
 
     if not ((disp_fil, disp_col) in disparos_anteriores):    
-       disparos_anteriores.add(tuple[disp_fil, disp_col])
+       disparos_anteriores.add((disp_fil, disp_col))
 
        if tablero[disp_fil, disp_col] == "~":
-            tablero[disp_fil, disp_col]="X"
+            tablero[disp_fil, disp_col]="A"
+            vista_del_tablero[disp_fil, disp_col]="A"
           
-       elif tablero[disp_fil, disp_col] == " ":
-            tablero[disp_fil, disp_col]="X"
+       elif tablero[disp_fil, disp_col] == ".":
+            tablero[disp_fil, disp_col]="A"
+            vista_del_tablero[disp_fil, disp_col]="A"
 
        elif tablero[disp_fil, disp_col] == "■":
            tablero[disp_fil, disp_col]="X"
-  
+           vista_del_tablero[disp_fil, disp_col]="X"
+           print("Puedo hacer otro disparo")
+           
+        #    if ( tablero[disp_fil-1, disp_col] == "■" or tablero[disp_fil+1, disp_col] == "■" or
+        #        tablero[disp_fil, disp_col-1] == "■" or tablero[disp_fil, disp_col+1] == "■" ):
+                   
+        #            (busco_fil, busco_col) = np.random.randchoice((disp_fil-1, disp_col), (disp_fil+1, disp_col),
+        #                                                           (disp_fil, disp_col-1), (disp_fil, disp_col+1))
+        #            disparos_anteriores.add((busco_fil, busco_col))
+        #            print("=============disparo=de================\n" \
+        #                 "==============busqueda==================\n" \
+        #                 "==========   ", (busco_fil, busco_col), "   ==========")
+        #            # y despues que? hay que entrar en la funcion pero desde 2do elif o reescribirlos aqui
+        #    else: disparar()
+               
+
     else: disparar()
 
 
 disparos_anteriores = set()
 
-#disparar()
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)    
+print(vista_del_tablero)
 
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)    
+print(vista_del_tablero)
 
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)  
+print(vista_del_tablero)
+
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)     
+print(vista_del_tablero)
+
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)   
+print(vista_del_tablero)
+
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)     
+print(vista_del_tablero)
+
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)     
+print(vista_del_tablero)
+
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)     
+print(vista_del_tablero)
+
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)     
+print(vista_del_tablero)
+
+disparar()
+print(tablero)
+print("set de disparos anteriores: ", disparos_anteriores)     
+print(vista_del_tablero)
 
 
 
