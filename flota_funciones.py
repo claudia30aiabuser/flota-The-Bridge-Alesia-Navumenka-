@@ -1,8 +1,6 @@
 import numpy as np
 #import flota_main
 
-
-
 # def crear_tablero():
 #     tablero=np.full((12, 12), " ")
 #     tablero[0, :]=np.arange(12)
@@ -22,15 +20,15 @@ import numpy as np
 tablero=np.full((12, 12), " ")
 tablero[0, :]=np.arange(12)
 tablero[:, 0]=np.arange(12)
-tablero[11, :]=np.full((1,12), "/")
-tablero[:, 11]=np.full((1,12), "/")
-# tablero[0, :]=np.array([chr(8304), chr(185), chr(178), chr(179), chr(8308), chr(8309), chr(8310), chr(8311), chr(8312), chr(8313), chr(7496), "*"])
-# tablero[:, 0]=np.array([chr(8304), chr(185), chr(178), chr(179), chr(8308), chr(8309), chr(8310), chr(8311), chr(8312), chr(8313), chr(7496), "*"])
-# #tablero[11, :]=np.full((1, 11), "*") 
+tablero[11, :]=np.full((1,12), "|")
+tablero[:, 11]=np.full((1,12), "|")
+        # tablero[0, :]=np.array([chr(8304), chr(185), chr(178), chr(179), chr(8308), chr(8309), chr(8310), chr(8311), chr(8312), chr(8313), chr(7496), "*"])
+        # tablero[:, 0]=np.array([chr(8304), chr(185), chr(178), chr(179), chr(8308), chr(8309), chr(8310), chr(8311), chr(8312), chr(8313), chr(7496), "*"])
+        # #tablero[11, :]=np.full((1, 11), "*") 
 vista_del_tablero = np.full((10, 10), " ")
-vista_del_tablero = np.pad(vista_del_tablero, 1, constant_values="/")
-print(tablero)
-print(vista_del_tablero)
+vista_del_tablero = np.pad(vista_del_tablero, 1, constant_values="|")
+# print(tablero)
+# print(vista_del_tablero)
  
 def colocar_barco4_rand():
    
@@ -42,7 +40,7 @@ def colocar_barco4_rand():
     if orient4 == "vert":
         pin4fil =np.random.randint(2,9) # fila de "cabeza" del barco 4
         pin4col =np.random.randint(1,11) # columna de "cabeza" del barco 4
-        print("orient4 =", orient4, "fila4 =", pin4fil, " columna4 =", pin4col) #quitar el print
+        print("orient4 =", orient4, "| fila4 =", pin4fil, "| columna4 =", pin4col) #quitar el print
         tablero[pin4fil-1:pin4fil+3, pin4col]="■" 
         
         tablero[pin4fil-2:pin4fil+4, pin4col+1]="~" 
@@ -52,7 +50,7 @@ def colocar_barco4_rand():
     elif orient4 == "horiz": 
         pin4fil =np.random.randint(1,11)    
         pin4col =np.random.randint(2,9)    
-        print("orient4 =", orient4, "fila4 =", pin4fil, " columna4 =", pin4col) #quitar el print
+        print("orient4 =", orient4, "| fila4 =", pin4fil, "| columna4 =", pin4col) #quitar el print
         tablero[pin4fil, pin4col-1:pin4col+3]="■"
         
         tablero[pin4fil, pin4col-2]="~"
@@ -75,7 +73,7 @@ def colocar_barco3_rand():
 
         if choca == False: 
             tablero[pin3fil, pin3col-1 : pin3col+2] = "■"
-            # dibujo * alrededor
+            # dibujo ~ alrededor
             tablero[pin3fil, pin3col-2] = "~"
             tablero[pin3fil, pin3col+2] = "~"
             tablero[pin3fil-1, pin3col-2 : pin3col+3] = "~"
@@ -87,11 +85,11 @@ def colocar_barco3_rand():
         pin3fil =np.random.randint(2,10) 
         pin3col =np.random.randint(1,11) 
         # print("orient3 =", orient3, "fila3 =", pin3fil, " columna3 =", pin3col) #quitar el print
-        choca = np.any(tablero[pin3fil-1:pin3fil+2, pin3col] == "■") or np.any(tablero[pin3fil, pin3col-1 : pin3col+2] == "~")
+        choca = np.any(tablero[pin3fil-1:pin3fil+2, pin3col] == "■") or np.any(tablero[pin3fil-1:pin3fil+2, pin3col] == "~")
 
         if choca == False: 
             tablero[pin3fil-1:pin3fil+2, pin3col] = "■"
-            # dibujo * alrededor
+            # dibujo ~ alrededor
             tablero[pin3fil-2:pin3fil+3, pin3col-1] = "~"
             tablero[pin3fil-2:pin3fil+3, pin3col+1] = "~"
             tablero[pin3fil-2, pin3col] = "~"
@@ -124,7 +122,7 @@ def colocar_barco2_rand():
         pin2fil =np.random.randint(1,10) 
         pin2col =np.random.randint(1,11)  
         # print("orient2 =", orient2, "fila2 =", pin2fil, " columna2 =", pin2col) #quitar el print
-        choca = np.any(tablero[pin2fil : pin2fil+2, pin2col] == "■") or np.any(tablero[pin2fil, pin2col : pin2col+2] == "~")
+        choca = np.any(tablero[pin2fil : pin2fil+2, pin2col] == "■") or np.any(tablero[pin2fil : pin2fil+2, pin2col] == "~")
 
         if choca == False: 
             tablero[pin2fil : pin2fil+2, pin2col] = "■"
@@ -193,7 +191,7 @@ def disparar():
 
 disparos_anteriores = set()
 
-disparar()
+#disparar()
 
 
 
