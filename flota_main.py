@@ -18,7 +18,7 @@ vista_del_tablero[11, :]=np.full((1,12), "|")
 vista_del_tablero[:, 11]=np.full((1,12), "|")
 
 
-disparos_anteriores = list()  # y tambien celdas alrededor de barcos hundidos
+disparos_anteriores = {"agua":{}, "tocados":[]}  # y tambien celdas alrededor de barcos hundidos
 
 colocar_10_barcos_rand(tablero)
 

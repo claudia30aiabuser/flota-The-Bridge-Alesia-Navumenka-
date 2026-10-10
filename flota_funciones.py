@@ -18,13 +18,29 @@ import random
 #     else:
 #         return tablero
 
-def alrederor(matriz, *pos_seq, orient_buscar=None, orient_buscar_exact=None):  # solo para facilitarme los slicings de pads de barcos hundidos
-     # pos_list: [(f1,c1),(f2,c2),(f3,c3),(f4,c4)]
-    if len(pos_seq) == 1:
-            # slice de (f-1, c-1) hasta (f+1, c+1) excepto el barco (f, c):
-            matriz[pos_seq[0][0]-1 : pos_seq[0][0]+2 , pos_seq[0][1]-1 : pos_seq[0][1]+2] = "~"
-            matriz[pos_seq[0][0], pos_seq[0][1]] = "X"
-    elif len(pos_seq) > 1:
+def hundir(matriz, *pos_seq, orient_buscar=None, orient_buscar_exact=None):  # solo para facilitarme los slicings de pads de barcos hundidos
+     # pos_tuple: ( (f1,c1),(f2,c2),(f3,c3),(f4,c4) )
+    if orient_buscar == "horiz":
+        
+        max_col = max(i[1] for i in pos_seq)
+        min_col = min(i[1] for i in pos_seq)
+
+        matriz[pos_seq[0][0]-1 : pos_seq[0][0]+2 , min_col-1 : max_col+2] = "~"
+        matriz[pos_seq[0][0], min_col : max_col+1] = "X"
+             
+    elif orient_buscar == "vert":
+
+        max_fil = max(i[0] for i in pos_seq)
+        min_fil = min(i[0] for i in pos_seq)
+
+        matriz[min_fil-1 : max_fil+2 , pos_seq[0][1]-1 : pos_seq[0][1]+2] = "~"
+        matriz[min_fil : max_fil+1, pos_seq[0][1]] = "X"
+        
+    else:
+        # entonces fue un barco de 1
+        matriz[pos_seq[0][0]-1 : pos_seq[0][0]+2 , pos_seq[0][1]-1 : pos_seq[0][1]+2] = "~"
+        matriz[pos_seq[0][0], pos_seq[0][1]] = "X"
+    
         
 
       
@@ -171,7 +187,7 @@ def colocar_10_barcos_rand(tablero):
 
 def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False):
  
-    def validacion_disparos(disp_fil, disp_col, orient_buscar=None, orient_buscar_exact=None):
+    def validacion_disparos(disp_fil, disp_col, orient_buscar=None, orient_buscar_exact=None, tocado=False):
         
         if tablero[disp_fil, disp_col] == "~":
             tablero[disp_fil, disp_col]="A"
@@ -185,9 +201,61 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
            tablero[disp_fil, disp_col]="X"
            vista_del_tablero[disp_fil, disp_col]="X"
            # esto es para buscar otras casillas del barco tocado en el disparo anterior o turno anterior   
+          
+           if tocado == False:
+                # busqueda random de cruz
+                if ( tablero[disp_fil-1, disp_col] == "■" or tablero[disp_fil+1, disp_col] == "■" or
+                        tablero[disp_fil, disp_col-1] == "■" or tablero[disp_fil, disp_col+1] == "■" ):
 
-           if ( tablero[disp_fil-1, disp_col] == "■" or tablero[disp_fil+1, disp_col] == "■" or
-                tablero[disp_fil, disp_col-1] == "■" or tablero[disp_fil, disp_col+1] == "■" ):
+                        busco_fil, busco_col = random.choice([(disp_fil, disp_col-1), (disp_fil, disp_col+1),
+                                                            (disp_fil+1, disp_col), (disp_fil-1, disp_col)])
+                        disparos_anteriores.append((busco_fil, busco_col))               
+                        print("=============disparo=de================\n" \
+                                "==============busqueda==================\n" \
+                                "============   ", (busco_fil, busco_col), "   =============")
+                        
+                        validacion_hundir(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado)
+           elif tocado == True:
+                # busqueda precisa -> se mira a los disparos anteriores para obtener orientacion del barco tocado
+                fil2, col2 = (disparos_anteriores[-2][0], disparos_anteriores[-2][1])  
+
+                if fil2 == disp_fil:
+                    orient_buscar == "horiz"
+
+                    busco_fil, busco_col = random.choice([(fil2, col2-1), (disp_fil, disp_col+1)])
+                    disparos_anteriores.append((busco_fil, busco_col))               
+                    print("=============disparo=de================\n" \
+                            "==============busqueda==================\n" \
+                            "============   ", (busco_fil, busco_col), "   =============")
+                    
+                    validacion_hundir(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado)                   
+                    
+                elif col2 == disp_col: 
+                    orient_buscar == "vert"
+
+                    busco_fil, busco_col = random.choice([(fil2+1, col2), (disp_fil-1, disp_col)])
+                    disparos_anteriores.append((busco_fil, busco_col))               
+                    print("=============disparo=de================\n" \
+                            "==============busqueda==================\n" \
+                            "============   ", (busco_fil, busco_col), "   =============")
+                    
+                    validacion_hundir(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado) 
+                    
+                    
+
+                if ( tablero[fil2-1, col2] == "■" or tablero[fil2+1, col2] == "■" or
+                                tablero[fil2, col2-1] == "■" or tablero[fil2, col2+1] == "■" ):
+                    
+                    busco_fil, busco_col = random.choice([(disp_fil, disp_col-1), (disp_fil, disp_col+1),
+                                                        (disp_fil+1, disp_col), (disp_fil-1, disp_col)])
+                    disparos_anteriores.append((busco_fil, busco_col))               
+                    print("=============disparo=de================\n" \
+                            "==============busqueda==================\n" \
+                            "============   ", (busco_fil, busco_col), "   =============")
+                    
+                    validacion_hundir(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado)               
+                   
+                   
                              
                    if orient_buscar is None:
                        orient_buscar =random.choice(["vert", "horiz"]) 
@@ -206,7 +274,7 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
                             
                             tocado = True # para el comportamiento de busqueda en siguiente turno si falla el disparo de busqueda
                            
-                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact)
+                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado)
                         elif tablero[disp_fil, disp_col+1] == "X":
                             busco_fil, busco_col = disp_fil, disp_col-1
                             disparos_anteriores.append((busco_fil, busco_col)) 
@@ -217,7 +285,7 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
 
                             tocado = True
 
-                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact)
+                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado)
                         else: # si entra aqui es un barco horizontal de 2/3/4 en su 2do disparo 
                             busco_fil, busco_col = random.choice([(disp_fil, disp_col-1), (disp_fil, disp_col+1)])
                             disparos_anteriores.append((busco_fil, busco_col))               
@@ -227,7 +295,7 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
                             
                             tocado = True
 
-                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact)
+                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado)
 
                    elif orient_buscar == "vert":
 
@@ -241,7 +309,7 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
 
                             tocado = True
 
-                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact)
+                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado)
                         elif tablero[disp_fil+1, disp_col] == "X":
                             busco_fil, busco_col = disp_fil-1, disp_col
                             disparos_anteriores.append((busco_fil, busco_col)) 
@@ -252,7 +320,7 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
 
                             tocado = True 
 
-                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact)
+                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado)
                         else: # si entra aqui es un barco vertical de 2/3/4 en su 2do disparo 
                             busco_fil, busco_col = random.choice([(disp_fil-1, disp_col), (disp_fil+1, disp_col)])
                             disparos_anteriores.append((busco_fil, busco_col))  
@@ -263,7 +331,7 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
                             
                             tocado = True
 
-                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact)
+                            validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact, tocado)
            else:   # para barcos hundidos de 1
 
                 for f, l in [(disp_fil-1, disp_col), (disp_fil+1, disp_col), (disp_fil, disp_col-1),
@@ -275,18 +343,36 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
                 print(">>>>>----Puedo hacer otro disparo----->>>>>")
                 disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado)
 
-    def validacion_hundir(disp_fil, disp_col, orient_buscar=None, orient_buscar_exact=None):
+    def validacion_hundir(disp_fil, disp_col, orient_buscar=None, orient_buscar_exact=None, tocado=False):
                   
-           if ( tablero[disp_fil-1, disp_col] == "X" or tablero[disp_fil+1, disp_col] == "X" or
+           if ( tablero[disp_fil-1, disp_col] == "■" or tablero[disp_fil+1, disp_col] == "■" or
+                tablero[disp_fil, disp_col-1] == "■" or tablero[disp_fil, disp_col+1] == "■" ):
+
+                tocado=True
+                print(">>>>>----Puedo hacer otro disparo----->>>>>")
+                validacion_disparos(disp_fil, disp_col, orient_buscar, orient_buscar_exact, tocado)
+
+           
+           elif ( tablero[disp_fil-1, disp_col] == "X" or tablero[disp_fil+1, disp_col] == "X" or
                  tablero[disp_fil, disp_col-1] == "X" or tablero[disp_fil, disp_col+1] == "X" ): 
                 
-                # la 2da casilla del barco de 2/3/4
-                fil2, col2 = (disparos_anteriores[-2][0], disparos_anteriores[-2][1])  
+                # la 3ra casilla del barco de 3/4
+                fil3, col3 = (disparos_anteriores["tocados"][-3][0], disparos_anteriores["tocados"][-3][1])  
 
-                if ( tablero[fil2-1, col2] == "■" or tablero[fil2+1, col2] == "■" or
-                                tablero[fil2, col2-1] == "■" or tablero[fil2, col2+1] == "■" ):
-                    #aqui entraria un barco de 3 o 4 con su 1r tocado en la mitad
+                if orient_buscar == "horiz":
+                     
+                    if ( tablero[fil3, col3-1] == "■" or tablero[fil3, col3+1] == "■" ):
+                         # esto solo es para el barco de 4 en su penultimo disparo
+                        print(">>>>>----Puedo hacer otro disparo----->>>>>")
+                        validacion_disparos(disp_fil, disp_col, orient_buscar, orient_buscar_exact, tocado)
+                    else:
+                         #entonces fue un barco de 3 - lo hundo
+
+                   
                     
+
+
+
                     if orient_buscar == "horiz":
                                                
                                                 ??????????????    
