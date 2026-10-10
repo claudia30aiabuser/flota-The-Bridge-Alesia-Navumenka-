@@ -18,7 +18,16 @@ import random
 #     else:
 #         return tablero
 
+def alrederor(matriz, *pos_seq, orient_buscar=None, orient_buscar_exact=None):  # solo para facilitarme los slicings de pads de barcos hundidos
+     # pos_list: [(f1,c1),(f2,c2),(f3,c3),(f4,c4)]
+    if len(pos_seq) == 1:
+            # slice de (f-1, c-1) hasta (f+1, c+1) excepto el barco (f, c):
+            matriz[pos_seq[0][0]-1 : pos_seq[0][0]+2 , pos_seq[0][1]-1 : pos_seq[0][1]+2] = "~"
+            matriz[pos_seq[0][0], pos_seq[0][1]] = "X"
+    elif len(pos_seq) > 1:
+        
 
+      
 
 def colocar_10_barcos_rand(tablero):
 
@@ -175,13 +184,15 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
         elif tablero[disp_fil, disp_col] == "■":
            tablero[disp_fil, disp_col]="X"
            vista_del_tablero[disp_fil, disp_col]="X"
-           # esto es para buscar otras casillas del barco tocado en el disparo o turno anterior                      
-           if ( tablero[disp_fil-1, disp_col] == "■" or tablero[disp_fil+1, disp_col] == "■" or
-               tablero[disp_fil, disp_col-1] == "■" or tablero[disp_fil, disp_col+1] == "■" ):
+           # esto es para buscar otras casillas del barco tocado en el disparo anterior o turno anterior   
 
+           if ( tablero[disp_fil-1, disp_col] == "■" or tablero[disp_fil+1, disp_col] == "■" or
+                tablero[disp_fil, disp_col-1] == "■" or tablero[disp_fil, disp_col+1] == "■" ):
+                             
                    if orient_buscar is None:
                        orient_buscar =random.choice(["vert", "horiz"]) 
-                   else: pass   # en caso de barcos de 3 o 4 ya estaria definido asi que lo uso
+                   else: pass   # en caso de barcos de 3 o 4 ya estaria definido 
+
 
                    if orient_buscar == "horiz":
                         # esto puede disparar al borde - solucionarlo con try/except
@@ -213,7 +224,7 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
                             print("=============disparo=de================\n" \
                                     "==============busqueda==================\n" \
                                     "============   ", (busco_fil, busco_col), "   =============")
-
+                            
                             tocado = True
 
                             validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact)
@@ -253,14 +264,39 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
                             tocado = True
 
                             validacion_disparos(busco_fil, busco_col, orient_buscar, orient_buscar_exact)
-            
-           elif ( tablero[disp_fil-1, disp_col] == "X" or tablero[disp_fil+1, disp_col] == "X" or
-                 tablero[disp_fil, disp_col-1] == "X" or tablero[disp_fil, disp_col+1] == "X" ): 
+           else:   # para barcos hundidos de 1
 
-                if (orient_buscar == "horiz" and orient_buscar_exact is None):  # para barcos hundidos de 2 
+                for f, l in [(disp_fil-1, disp_col), (disp_fil+1, disp_col), (disp_fil, disp_col-1),
+                                                                             (disp_fil, disp_col+1)]:
+                    vista_del_tablero[f, l] = "~"
+                    disparos_anteriores.append((f, l))
+                
+                print("----¡¡¡¡¡¡¡¡¡¡ BARCO HUNDIDO !!!!!!!!!!----")
+                print(">>>>>----Puedo hacer otro disparo----->>>>>")
+                disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado)
+
+    def validacion_hundir(disp_fil, disp_col, orient_buscar=None, orient_buscar_exact=None):
+                  
+           if ( tablero[disp_fil-1, disp_col] == "X" or tablero[disp_fil+1, disp_col] == "X" or
+                 tablero[disp_fil, disp_col-1] == "X" or tablero[disp_fil, disp_col+1] == "X" ): 
+                
+                # la 2da casilla del barco de 2/3/4
+                fil2, col2 = (disparos_anteriores[-2][0], disparos_anteriores[-2][1])  
+
+                if ( tablero[fil2-1, col2] == "■" or tablero[fil2+1, col2] == "■" or
+                                tablero[fil2, col2-1] == "■" or tablero[fil2, col2+1] == "■" ):
+                    #aqui entraria un barco de 3 o 4 con su 1r tocado en la mitad
                     
-                    fil2, col2 = (disparos_anteriores[-2][0], disparos_anteriores[-2][1])  # la 2da casilla del barco de 2
-                    
+                    if orient_buscar == "horiz":
+                                               
+                                                ??????????????    
+                    print("=============disparo=de================\n" \
+                            "==============busqueda==================\n" \
+                            "============   ", (disp_fil, disp_col), "   =============")
+                else: pass
+   
+                if (orient_buscar == "horiz" and orient_buscar_exact is None):  # validacio del 2do disparo de bercos de 2/3/4  
+                     
                     vista_del_tablero[disp_fil-1, disp_col] = "~"
                     vista_del_tablero[disp_fil+1, disp_col] = "~"
                     vista_del_tablero[fil2-1, col2] = "~"
@@ -346,19 +382,8 @@ def disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado=False)
                     print(">>>>>----Puedo hacer otro disparo----->>>>>")
                     disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado)
              
-           else:   # para barcos hundidos de 1
-
-                for f, l in [(disp_fil-1, disp_col), (disp_fil+1, disp_col), (disp_fil, disp_col-1),
-                                                                             (disp_fil, disp_col+1)]:
-                    vista_del_tablero[f, l] = "~"
-                    disparos_anteriores.append((f, l))
-                
-                print("----¡¡¡¡¡¡¡¡¡¡ BARCO HUNDIDO !!!!!!!!!!----")
-                print(">>>>>----Puedo hacer otro disparo----->>>>>")
-                disparar_rand(tablero, vista_del_tablero, disparos_anteriores, tocado)
-
     if tocado == True:
-        # tomo el previo disparo antes de fallar y perder turno
+        # tomo el disparo del turno previo en el cual habia fallado pero toco el barco
         fil2, col2 = (disparos_anteriores[-2][0], disparos_anteriores[-2][1])
         disp_fil, disp_col = random.choice((fil2-1, col2), (fil2+1, col2), 
                                            (fil2, col2-1), (fil2, col2+1))
