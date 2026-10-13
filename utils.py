@@ -2,8 +2,9 @@ import numpy as np
 import random
 
 
-disparos_anteriores = {"agua":set(), "tocado":[]}  # y tambien celdas alrededor de barcos hundidos
-flota={"barco4":[], "barco3":[], "barco2":[], "barco1":[]}
+
+disparos_anteriores = { "agua":set(), "tocado":[] }  # y tambien celdas alrededor de barcos hundidos
+flota={ "barco4":[], "barco3":[], "barco2":[], "barco1":[] }
 
 
 def crear_tablero(size=10, vista=False):
@@ -26,16 +27,15 @@ def crear_tablero(size=10, vista=False):
         return vista_del_tablero
 
 
-def colocar_barcos(tablero, *mi_flota):
-    if mi_flota == 0:
-        mi_flota = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
+def colocar_barcos(tablero, mi_flota):
+    if mi_flota[0] == "0":
+        mi_flota = ["4", "3", "3", "2", "2", "2", "1", "1", "1", "1"]
         return colocar_barcos_rand(tablero, mi_flota)
     else:
         return colocar_barcos_rand(tablero, mi_flota)
 
 
-
-def colocar_barcos_rand(tablero, *mi_flota):
+def colocar_barcos_rand(tablero, mi_flota):
 
 
     def colocar_barco4_rand(tablero):
@@ -118,7 +118,6 @@ def colocar_barcos_rand(tablero, *mi_flota):
                 tablero[pin3fil+2, pin3col] = "~"
             else: colocar_barco3_rand(tablero)
 
-
     def colocar_barco2_rand(tablero):
         # pin2fil, pin2col - punto 1 del barco [*][]
         orient2 =np.random.choice(["vert", "horiz"]) 
@@ -157,7 +156,6 @@ def colocar_barcos_rand(tablero, *mi_flota):
                 tablero[pin2fil+2, pin2col] = "~"
             else: colocar_barco2_rand(tablero)
 
-
     def colocar_barco1_rand(tablero):
         
         pin1fil =np.random.randint(1,tablero.shape[0]-1) 
@@ -176,14 +174,16 @@ def colocar_barcos_rand(tablero, *mi_flota):
         else: colocar_barco1_rand(tablero)
 
     for i in mi_flota:
-        if i == 4:
+        if i == "4":
             colocar_barco4_rand(tablero)
-        elif i == 3:
+        elif i == "3":
             colocar_barco3_rand(tablero) 
-        elif i == 2:
+        elif i == "2":
             colocar_barco2_rand(tablero)
-        elif i == 1:
+        elif i == "1":
             colocar_barco1_rand(tablero)
+        elif i != ("4" or "3" or "2" or "1"):
+            pass
 
     # bordes de tablero bonitos
     tablero[0, :]=np.arange(tablero.shape[1])
@@ -192,19 +192,25 @@ def colocar_barcos_rand(tablero, *mi_flota):
     tablero[:, -1]=np.full((1,tablero.shape[1]), "1")
 
 
-def disparar((fil, col), tablero, vista_del_tablero):
-
+# def disparar(fil, col, tablero, vista_del_tablero=False):
+#     fil, col = tuple(input("Mi disparo [fila, columna]: "))
 
 
 def disparar_rand(tablero, vista_del_tablero):
+    
+    def hundir(matriz, barco):  # solo para facilitarme los slicings de pads de barcos hundidos
+        
+        orient=None
+        if len(barco) > 1:
+            if barco[0][0] == barco[1][0]:
+                orient = "horiz"
+            elif barco[0][1] == barco[1][1]:
+                orient = "vert"
 
-    def hundir(matriz, *pos_seq):  # solo para facilitarme los slicings de pads de barcos hundidos
-        # pos_tuple: ( (f1,c1),(f2,c2),(f3,c3),(f4,c4) )
-        if orient_buscar == "horiz":
-
+        if orient == "horiz":
             #lista sorteada de casillas del barco
             #max: [(3, 1), (3, 2), (3, 3), (3, 4)]
-            barco=sorted(list(i for i in pos_seq))
+            # barco=sorted(list(i for i in pos_seq))
                 #fila arriba:
             matriz[barco[0][0]-1, barco[0][1]-1 : barco[-1][1]+2] = "~" 
             alrededores=list( (f-1, c) for f,c in barco )
@@ -223,9 +229,9 @@ def disparar_rand(tablero, vista_del_tablero):
             matriz[barco[0][0], barco[-1][1]+1] = "~"
             disparos_anteriores["agua"].add((barco[0][0], barco[-1][1]+1))
                 
-        elif orient_buscar == "vert":
+        elif orient == "vert":
             # max: [(1, 2), (2, 2), (3, 2), (4, 2)]
-            barco=sorted(list(i for i in pos_seq))
+            # barco=sorted(list(i for i in pos_seq))
                 #columna izq:
             matriz[barco[0][0]-1 : barco[-1][0]+2, barco[0][1]-1 ] = "~" 
             alrededores=list( (f, c-1) for f,c in barco )
@@ -246,53 +252,60 @@ def disparar_rand(tablero, vista_del_tablero):
             
         else:
             # entonces fue un barco de 1: (pos_seq[0][0], pos_seq[0][1])
-            matriz[pos_seq[0][0]-1, pos_seq[0][1]-1 : pos_seq[0][1] +2] = "~"
-            disparos_anteriores["agua"].add((pos_seq[0][0]-1, pos_seq[0][1]-1))
-            disparos_anteriores["agua"].add((pos_seq[0][0]-1, pos_seq[0][1]))
-            disparos_anteriores["agua"].add((pos_seq[0][0]-1, pos_seq[0][1]+1))
+            matriz[barco[0][0]-1, barco[0][1]-1 : barco[0][1] +2] = "~"
+            disparos_anteriores["agua"].add((barco[0][0]-1, barco[0][1]-1))
+            disparos_anteriores["agua"].add((barco[0][0]-1, barco[0][1]))
+            disparos_anteriores["agua"].add((barco[0][0]-1, barco[0][1]+1))
             
-            matriz[pos_seq[0][0]+1, pos_seq[0][1]-1 : pos_seq[0][1] +2] = "~"
-            disparos_anteriores["agua"].add((pos_seq[0][0]+1, pos_seq[0][1]-1))
-            disparos_anteriores["agua"].add((pos_seq[0][0]+1, pos_seq[0][1]))
-            disparos_anteriores["agua"].add((pos_seq[0][0]+1, pos_seq[0][1]+1))
+            matriz[barco[0][0]+1, barco[0][1]-1 : barco[0][1] +2] = "~"
+            disparos_anteriores["agua"].add((barco[0][0]+1, barco[0][1]-1))
+            disparos_anteriores["agua"].add((barco[0][0]+1, barco[0][1]))
+            disparos_anteriores["agua"].add((barco[0][0]+1, barco[0][1]+1))
 
-            matriz[pos_seq[0][0], pos_seq[0][1]-1] = "~"
-            matriz[pos_seq[0][0], pos_seq[0][1]+1] = "~"
-            disparos_anteriores["agua"].add((pos_seq[0][0], pos_seq[0][1]-1))
-            disparos_anteriores["agua"].add((pos_seq[0][0], pos_seq[0][1]+1))
+            matriz[barco[0][0], barco[0][1]-1] = "~"
+            matriz[barco[0][0], barco[0][1]+1] = "~"
+            disparos_anteriores["agua"].add((barco[0][0], barco[0][1]-1))
+            disparos_anteriores["agua"].add((barco[0][0], barco[0][1]+1))
 
     def validacion_disparo(disp_fil, disp_col):
 
         if (disp_fil, disp_col) in flota["barco1"]:
-            hundir(vista_del_tablero, disp_fil, disp_col)
+            hundir(vista_del_tablero, [(disp_fil, disp_col)])
 
             print("---------¡¡¡ BARCO HUNDIDO !!!---------")
             print(" >>>>>----Puedo hacer otro disparo----->>>>>")
             disparar_rand(tablero, vista_del_tablero)
 
         else:
-            barco = 0
+            barco_list = 0
             for i in flota["barco4"]:
                 if (disp_fil, disp_col) in i:
-                    barco= i
+                    barco_list= i
                     break
             for i in flota["barco3"]:
                 if (disp_fil, disp_col) in i:
-                    barco= i
+                    barco_list= i
                     break
             for i in flota["barco2"]:
                 if (disp_fil, disp_col) in i:
-                    barco= i
+                    barco_list= i
                     break
-????????????????
-            for i in barco:
+
+            counter=len(barco_list)
+            for i in barco_list:  # si todavia hay unas celdas vivas - solo disparo
                 if tablero[i] == "■":
-                    pass
-                else: 
-                    hundir(vista_del_tablero, barco)
-                    print("---------¡¡¡ BARCO HUNDIDO !!!---------")
                     print(" >>>>>----Puedo hacer otro disparo----->>>>>")
                     disparar_rand(tablero, vista_del_tablero)
+                    break
+                elif tablero[i] == "X": 
+                    counter -=1
+                    continue
+            
+            if counter==0:
+                hundir(vista_del_tablero, barco_list)
+                print("---------¡¡¡ BARCO HUNDIDO !!!---------")
+                print(" >>>>>----Puedo hacer otro disparo----->>>>>")
+                disparar_rand(tablero, vista_del_tablero)
 
   
 ### empieza la funcion
