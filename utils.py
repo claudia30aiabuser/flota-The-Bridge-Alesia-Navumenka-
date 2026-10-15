@@ -43,11 +43,10 @@ class player:
     def colocar_barcos(self):
         
         if self.flota_input[0] == "0":
-            self.flota = ["4", "3", "3", "2", "2", "2", "1", "1", "1", "1"]
-            return self.colocar_barcos_rand(self)
+            self.flota_input = ["4", "3", "3", "2", "2", "2", "1", "1", "1", "1"]
+            self.colocar_barcos_rand()
         else:
-            self.flota = self.flota_input
-            return self.colocar_barcos_rand(self)
+            self.colocar_barcos_rand()
 
 
     def colocar_barcos_rand(self):
@@ -187,7 +186,7 @@ class player:
                 self.tablero[pin1fil, pin1col+1] = "~"
             else: colocar_barco1_rand()
 
-        for i in self.flota:
+        for i in self.flota_input:
             if i == "4":
                 colocar_barco4_rand()
             elif i == "3":
@@ -272,14 +271,18 @@ class player:
                 self.disparos_anteriores["agua"].add((barco[0][0], barco[0][1]-1))
                 self.disparos_anteriores["agua"].add((barco[0][0], barco[0][1]+1))
 
-        def validacion_disparo(self, enemigo: "player", disp_fil, disp_col):
+        def validacion_disparo(disp_fil, disp_col):
 
             if (disp_fil, disp_col) in enemigo.flota["barco1"]:
-                hundir(self, enemigo, [(disp_fil, disp_col)])
+                hundir([(disp_fil, disp_col)])
 
-                print("---------¡¡¡ BARCO HUNDIDO !!!---------")
-                print(" >>>>>----Puedo hacer otro disparo----->>>>>")
-                self.disparar(self, enemigo, rand)
+                print("----------------------------------------------------------¡¡¡ BARCO HUNDIDO !!!------------------")
+                print("~~~~~~~~~~~~~~~~______TU tablero______~~~~~~~~~~~~~~~~~_____tablero del ENEMIGO_____~~~~~~~~~~~~~")
+                for f1,f2 in zip(self.tablero, enemigo.vista_tablero):
+                    print("            ", f1, "               ", f2)
+
+                print(" VVVV---Puedo hacer otro disparo---VVVV----------------------------------------------------------")
+                self.disparar(enemigo,  rand)
 
             else: 
                 barco_list = 0  # a esta variable metere la lista de las coordenadas del barco tocado
@@ -299,18 +302,28 @@ class player:
                 counter = len(barco_list)
                 for i in barco_list:  # si todavia hay celdas vivas del barco tocado - solo disparo
                     if enemigo.tablero[i] == "■":
-                        print(" >>>>>----Puedo hacer otro disparo----->>>>>")
-                        self.disparar(self, enemigo, rand)
+                        print("~~~~~~~~~~~~~~~~______TU tablero______~~~~~~~~~~~~~~~~~_____tablero del ENEMIGO_____~~~~~~~~~~~~~")
+                        
+                        for f1,f2 in zip(self.tablero, enemigo.vista_tablero):
+                            print("            ", f1, "               ", f2)
+
+                        print(" VVVV---Puedo hacer otro disparo---VVVV----------------------------------------------------------")
+                        self.disparar(enemigo, rand)
                         break
                     elif enemigo.tablero[i] == "X": 
                         counter -=1
                         continue
                 
                 if counter == 0:
-                    hundir(self, enemigo, barco_list)
-                    print("---------¡¡¡ BARCO HUNDIDO !!!---------")
-                    print(" >>>>>----Puedo hacer otro disparo----->>>>>")
-                    self.disparar(self, enemigo, rand)
+                    hundir(barco_list)
+                    print("----------------------------------------------------------¡¡¡ BARCO HUNDIDO !!!------------------")
+                    print("~~~~~~~~~~~~~~~~______TU tablero______~~~~~~~~~~~~~~~~~_____tablero del ENEMIGO_____~~~~~~~~~~~~~")
+                    
+                    for f1,f2 in zip(self.tablero, enemigo.vista_tablero):
+                        print("            ", f1, "               ", f2)
+
+                    print(" VVVV---Puedo hacer otro disparo---VVVV----------------------------------------------------------")
+                    self.disparar(enemigo,  rand)
     
     ### empieza la funcion
         if rand == True:
@@ -319,15 +332,13 @@ class player:
             disp_col = np.random.randint(1, enemigo.tablero.shape[1]-1)
 
         elif rand == False:
-            disparo = input("Mi disparo [fila, columna]: ")
+            disparo = input("TU disparo fila, columna: ")
         
             (fil, col) = re.split(r"[,;.\s]+", disparo)
             disp_fil= int(fil) 
             disp_col = int(col)
         
         if not ((disp_fil, disp_col) in self.disparos_anteriores):    
-            print("==============  disparo NUEVO  ===============\n" \
-            "================= ", (disp_fil, disp_col), " =================")
 
             if enemigo.tablero[disp_fil, disp_col] == "~":
                 enemigo.tablero[disp_fil, disp_col]="A"
@@ -343,8 +354,8 @@ class player:
                 enemigo.tablero[disp_fil, disp_col]="X"
                 enemigo.vista_tablero[disp_fil, disp_col]="X"
                 self.disparos_anteriores["tocado"].append((disp_fil, disp_col))
-                validacion_disparo(self, enemigo, disp_fil, disp_col)
+                validacion_disparo(disp_fil, disp_col)
         
         else: 
             print("Este disparo ya existe - reintento") 
-            self.disparar(self, enemigo, rand)
+            self.disparar(enemigo, rand)
