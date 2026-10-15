@@ -7,7 +7,7 @@ class player:
 
     size = int(input("\n ¿DIMENCION DEL TABLERO? \n\n  filas = columnas = "))
     flota_input = list(input("\n ¿ESLORAS DE LOS BARCOS? (max eslora es 4)\n" \
-                    "Para usar la flota clasica (4, 3, 3, 2, 2, 2, 1, 1, 1, 1) pulse 0 [enter].\n"))
+                    "Para usar la flota clasica [4, 3, 3, 2, 2, 2, 1, 1, 1, 1 - solo para tableros mas de 9x9] pulse 0 + [enter].\n"))
 
     def crear_tablero(self, size=10, vista=False):
 
