@@ -1,5 +1,6 @@
 import numpy as np
 import re
+import random
 from utils import (player)
 
 print("~~~~~~~~~~_NUEVA_PARTIDA_~~~~~~~~~~~~~~~_NUEVA_PARTIDA_~~~~~~~~~~~~~~~~~_NUEVA_PARTIDA_~~~~~~~~~\n" \
@@ -9,7 +10,7 @@ maquina = player()
 
 
 for f1, f2 in zip(yo.tablero, yo.vista_tablero):
-    print("            ", f1, "            ", f2)
+    print("            ", f1, "               ", f2)
 
 print("mi flota = ", yo.flota)
 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -24,16 +25,16 @@ while np.any(yo.tablero == "■") and np.any(maquina.tablero == "■"):
     counter +=1
 
     print( f"\n\n                                   || RONDA #{counter} ||\n\n" )
-    print("~~~~~~~~~~~~~~~~______TU tablero______~~~~~~~~~~~~~~~~~_____tablero del ENEMIGO_____~~~~~~~~~~~~~")
     yo.disparar(maquina, rand=False)
-    for f1,f2 in zip(yo.tablero, maquina.vista_tablero):
-        print("            ", f1, "               ", f2)
-
-
     print("~~~~~~~~~~~~~~~~______TU tablero______~~~~~~~~~~~~~~~~~_____tablero del ENEMIGO_____~~~~~~~~~~~~~")
-    maquina.disparar(yo, rand=True)
     for f1,f2 in zip(yo.tablero, maquina.vista_tablero):
         print("            ", f1, "               ", f2)
+    
+    maquina.disparar(yo, rand=True)
+    print("~~~~~~~~~~~~~~~~______TU tablero______~~~~~~~~~~~~~~~~~_____tablero del ENEMIGO_____~~~~~~~~~~~~~")
+    for f1,f2 in zip(yo.tablero, maquina.vista_tablero):
+        print("            ", f1, "               ", f2)
+    print("---^^^^^^---mira el disparo del ENEMIGO---^^^^^^-------------------------------------------------")
 
 
 print( f"\n\n                                   || FIN DEL JUEGO ||\n\n" )

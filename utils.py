@@ -5,11 +5,9 @@ import re
 
 class player:
 
-    size = int(input("EL TAMANO DEL TABLERO? \n filas x columnas, filas=columnas="))
-    flota_input = list(input("Indique los barcos con los cuales se juega esta partida, separando sus esloras por comas (max eslora es 4).\n" \
-                    "Ejemplo (la flota clasica):  4, 3, 3, 2, 2, 2, 1, 1, 1, 1 \n" \
-                    "Para usar la flota clasica pulse 0 [enter].\n"))
-    # disparos_anteriores = { "agua":set(), "tocado":[] }  # y tambien celdas alrededor de barcos hundidos
+    size = int(input("\n ¿DIMENCION DEL TABLERO? \n\n  filas = columnas = "))
+    flota_input = list(input("\n ¿ESLORAS DE LOS BARCOS? (max eslora es 4)\n" \
+                    "Para usar la flota clasica (4, 3, 3, 2, 2, 2, 1, 1, 1, 1) pulse 0 [enter].\n"))
 
     def crear_tablero(self, size=10, vista=False):
 
@@ -206,6 +204,28 @@ class player:
 
 
     def disparar(self, enemigo: "player", rand=False):
+
+        def validacion_inicial(disp_fil, disp_col):
+
+            if (disp_fil, disp_col) in self.disparos_anteriores["agua"] or (disp_fil, disp_col) in self.disparos_anteriores["tocado"] :    
+                print("Este disparo ya existe - reintento") 
+                self.disparar(enemigo, rand)
+            else: 
+                if enemigo.tablero[disp_fil, disp_col] == "~":
+                    enemigo.tablero[disp_fil, disp_col]="A"
+                    enemigo.vista_tablero[disp_fil, disp_col]="A"
+                    self.disparos_anteriores["agua"].add((disp_fil, disp_col))
+                    
+                elif enemigo.tablero[disp_fil, disp_col] == ".":
+                    enemigo.tablero[disp_fil, disp_col]="A"
+                    enemigo.vista_tablero[disp_fil, disp_col]="A"
+                    self.disparos_anteriores["agua"].add((disp_fil, disp_col))
+
+                elif enemigo.tablero[disp_fil, disp_col] == "■":
+                    enemigo.tablero[disp_fil, disp_col]="X"
+                    enemigo.vista_tablero[disp_fil, disp_col]="X"
+                    self.disparos_anteriores["tocado"].append((disp_fil, disp_col))
+                    validacion_disparo(disp_fil, disp_col)
     
         def hundir( barco):  # solo para facilitarme los slicings de pads ~ de barcos hundidos
             
@@ -270,6 +290,31 @@ class player:
                 enemigo.vista_tablero[barco[0][0], barco[0][1]+1] = "~"
                 self.disparos_anteriores["agua"].add((barco[0][0], barco[0][1]-1))
                 self.disparos_anteriores["agua"].add((barco[0][0], barco[0][1]+1))
+        
+        def buscar_barco(disp_fil, disp_col, barco_list):
+            trozos_barco=[]
+            for i in barco_list:
+                if i in self.disparos_anteriores["tocado"]:
+                  trozos_barco.append(i)  
+            
+            if len(trozos_barco) ==1:
+                busco_fil, busco_col = random.choice([(disp_fil, disp_col-1), (disp_fil, disp_col+1),
+                                                          (disp_fil+1, disp_col), (disp_fil-1, disp_col)])
+            else:
+                orientbuscar = 0
+                if trozos_barco[0][0] == trozos_barco[1][0]:
+                    orientbuscar = "horiz"
+                elif trozos_barco[0][1] == trozos_barco[1][1]:
+                    orientbuscar = "vert"
+
+                trozos_barco=sorted(list(i for i in trozos_barco))                    
+                if orientbuscar == "horiz":
+                    busco_fil, busco_col = random.choice([(trozos_barco[0][0], trozos_barco[0][1]-1), (trozos_barco[-1][0], trozos_barco[-1][1]+1)])
+
+                elif orientbuscar == "vert":
+                    busco_fil, busco_col = random.choice([(trozos_barco[0][0]+1, trozos_barco[0][1]), (trozos_barco[-1][0]-1, trozos_barco[-1][1])])
+            
+            return busco_fil, busco_col 
 
         def validacion_disparo(disp_fil, disp_col):
 
@@ -284,7 +329,7 @@ class player:
                 print(" VVVV---Puedo hacer otro disparo---VVVV----------------------------------------------------------")
                 self.disparar(enemigo,  rand)
 
-            else: 
+            else: # aqui se entra si el barco esta tocado -> hay que buscar alrededor (en caso de maquina)
                 barco_list = 0  # a esta variable metere la lista de las coordenadas del barco tocado
                 for i in enemigo.flota["barco4"]:
                     if (disp_fil, disp_col) in i:
@@ -307,9 +352,15 @@ class player:
                         for f1,f2 in zip(self.tablero, enemigo.vista_tablero):
                             print("            ", f1, "               ", f2)
 
-                        print(" VVVV---Puedo hacer otro disparo---VVVV----------------------------------------------------------")
-                        self.disparar(enemigo, rand)
-                        break
+                        print(" VVVV__Puedo hacer otro disparo__VVVV----------------------------------------------------------")
+
+                        if rand == True: #solo para la maquina para que su siguiente disparo sea alrededor del barco
+                            disp_fil, disp_col = buscar_barco(disp_fil, disp_col, barco_list)
+                            validacion_inicial(disp_fil, disp_col)
+                        else:        
+                            self.disparar(enemigo, rand)
+                            break
+
                     elif enemigo.tablero[i] == "X": 
                         counter -=1
                         continue
@@ -324,38 +375,18 @@ class player:
 
                     print(" VVVV---Puedo hacer otro disparo---VVVV----------------------------------------------------------")
                     self.disparar(enemigo,  rand)
-    
+
+
     ### empieza la funcion
         if rand == True:
                 
             disp_fil = np.random.randint(1, enemigo.tablero.shape[0]-1)
             disp_col = np.random.randint(1, enemigo.tablero.shape[1]-1)
-
+            validacion_inicial(disp_fil, disp_col)
         elif rand == False:
             disparo = input("TU disparo fila, columna: ")
         
             (fil, col) = re.split(r"[,;.\s]+", disparo)
             disp_fil= int(fil) 
             disp_col = int(col)
-        
-        if not ((disp_fil, disp_col) in self.disparos_anteriores):    
-
-            if enemigo.tablero[disp_fil, disp_col] == "~":
-                enemigo.tablero[disp_fil, disp_col]="A"
-                enemigo.vista_tablero[disp_fil, disp_col]="A"
-                self.disparos_anteriores["agua"].add((disp_fil, disp_col))
-                
-            elif enemigo.tablero[disp_fil, disp_col] == ".":
-                enemigo.tablero[disp_fil, disp_col]="A"
-                enemigo.vista_tablero[disp_fil, disp_col]="A"
-                self.disparos_anteriores["agua"].add((disp_fil, disp_col))
-
-            elif enemigo.tablero[disp_fil, disp_col] == "■":
-                enemigo.tablero[disp_fil, disp_col]="X"
-                enemigo.vista_tablero[disp_fil, disp_col]="X"
-                self.disparos_anteriores["tocado"].append((disp_fil, disp_col))
-                validacion_disparo(disp_fil, disp_col)
-        
-        else: 
-            print("Este disparo ya existe - reintento") 
-            self.disparar(enemigo, rand)
+            validacion_inicial(disp_fil, disp_col)
